@@ -108,16 +108,18 @@ void loop(){
 //  Serial.print("\t| GyX = "); Serial.print(GyX);
 //  Serial.print("\t| GyY = "); Serial.print(GyY);
 //  Serial.print("\t| GyZ = "); Serial.print(GyZ);
-  Serial.print("\t| mx = "); Serial.print(myIMU.mx);
-  Serial.print("\t| my = "); Serial.print(myIMU.my);
-  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
-  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
-  delay(333);
-  /* //Prototype Send  
+//  Serial.print("\t| mx = "); Serial.print(myIMU.mx);
+//  Serial.print("\t| my = "); Serial.print(myIMU.my);
+//  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
+//  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
   char msg[50] = "";
-  sprintf(msg,"%f,%f,%f,%f\n",myIMU.mx, myIMU.my, myIMU.mz, magnitude);
-  Serial.print(msg);
-   */
+  Serial.print(myIMU.mx); Serial.print(","); Serial.print(myIMU.my); Serial.print(","); Serial.print(myIMU.mz); Serial.print("\n");
+  delay(333);
+  //Prototype Send  
+//  sprintf(msg,"%d,%d,%d,%d\n",myIMU.mx*100, myIMU.my*100, myIMU.mz*100, magnitude*100);
+//  Serial.print(msg);
+//  dtostrf(myIMU.mx,5,2,msg);
+//  Serial.print(msg);
   
 
   //Data Processing
