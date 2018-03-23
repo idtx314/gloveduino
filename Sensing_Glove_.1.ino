@@ -6,11 +6,12 @@
 #include "MPU9250.h"
 #include <Sparkfun_DRV2605L.h> //SparkFun Haptic Motor Driver Library 
 
-
+int debug = 0;
 const int MPU_addr=0x68;  // I2C address of the MPU-6050
 const int AK_addr=0x0C; // I2C address of the AK8963 Magnetometer registers are denoted by an H at the end.
 uint8_t c;
 int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
+float magnitude;
 
 MPU9250 myIMU;        //Initialize class
 SFE_HMD_DRV2605L HMD; //Create haptic motor driver object 
@@ -22,6 +23,8 @@ void setup(){
 
   // Start by performing self test and reporting values
   myIMU.MPU9250SelfTest(myIMU.SelfTest);
+  if(debug)
+  {
   Serial.print("x-axis self test: acceleration trim within : ");
   Serial.print(myIMU.SelfTest[0],1); Serial.println("% of factory value");
   Serial.print("y-axis self test: acceleration trim within : ");
@@ -34,6 +37,7 @@ void setup(){
   Serial.print(myIMU.SelfTest[4],1); Serial.println("% of factory value");
   Serial.print("z-axis self test: gyration trim within : ");
   Serial.print(myIMU.SelfTest[5],1); Serial.println("% of factory value");
+  }
 
   myIMU.getAres();
   myIMU.getGres();
@@ -41,10 +45,12 @@ void setup(){
 
   // Calibrate gyro and accelerometers, load biases in bias registers
   myIMU.calibrateMPU9250(myIMU.gyroBias, myIMU.accelBias);
+  if(debug)
+  {
   Serial.print("x-axis biases: "); Serial.print(myIMU.gyroBias[0]); Serial.print("d/s, "); Serial.print(myIMU.accelBias[0]); Serial.println("g");
   Serial.print("y-axis biases: "); Serial.print(myIMU.gyroBias[1]); Serial.print("d/s, "); Serial.print(myIMU.accelBias[1]); Serial.println("g");
   Serial.print("z-axis biases: "); Serial.print(myIMU.gyroBias[2]); Serial.print("d/s, "); Serial.print(myIMU.accelBias[2]); Serial.println("g");
-
+  }
 
 
   //Power on MPU
@@ -93,21 +99,19 @@ void loop(){
   GyY=Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyZ=Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
 
-  //Data translation into usable values
-//  AcX = AcX * myIMU.aRes - myIMU.accelBias[0];     //Ares and accelBias are floats, AcX is an int. May need to cast and use a different variable
-//  AcY = AcY * myIMU.aRes - myIMU.accelBias[1];
-//  AcZ = AcZ * myIMU.aRes - myIMU.accelBias[2];
-//  GyX = GyX * myIMU.gRes;
-//  GyY = GyY * myIMU.gRes;
-//  GyZ = GyZ * myIMU.gRes;
+  //Data translation into usable float values
+  myIMU.ax = (float)AcX * myIMU.aRes - myIMU.accelBias[0];     //Ares and accelBias are floats, AcX is an int.
+  myIMU.ay = (float)AcY * myIMU.aRes - myIMU.accelBias[1];
+  myIMU.az = (float)AcZ * myIMU.aRes - myIMU.accelBias[2];
+  myIMU.gx = (float)GyX * myIMU.gRes;
+  myIMU.gy = (float)GyY * myIMU.gRes;
+  myIMU.gz = (float)GyZ * myIMU.gRes;
 
   //Mag Request
   Wire.beginTransmission(AK_addr);
   Wire.write(0x03);  // starting with register 0x03H (MAG_XOUT_L)
   Wire.endTransmission(false);
   Wire.requestFrom(AK_addr,7,true);  // request a total of 6 registers
-
-  float magnitude;
   
   //Mag Receive
   myIMU.magCount[0]=Wire.read()|Wire.read()<<8;  // 0x03H (MAG_XOUT_L) & 0x04H (MAG_XOUT_H)     
@@ -135,29 +139,35 @@ void loop(){
   //Data Processing
   //todo make sure this can actually hold the full calculation. Might be too small?
   magnitude = sqrt(myIMU.mx*myIMU.mx + myIMU.my*myIMU.my + myIMU.mz*myIMU.mz);  //Calculate the field magnitude with math.h
+  //Rolling Sum of gyro orientation
+    //Going to use time for this. It's the only thing in the quad program that actually bothered
+    //millis() should return the number of microseconds since the program began running. If I keep a 1 reading history I can calculate the time since last read.
+  //Accelerometer Orientation Estimate
+    //atan2(double y, double x); This might return in rad/s
+  //Complementary Filter
   
   
 
-  //Output
-//  Serial.print("AcX = "); Serial.print(AcX);
-//  Serial.print("\t| AcY = "); Serial.print(AcY);
-//  Serial.print("\t| AcZ = "); Serial.print(AcZ);
+  //Debug Output
+//  Serial.print("AcX = "); Serial.print(myIMU.ax);
+//  Serial.print("\t| AcY = "); Serial.print(myIMU.ay);
+//  Serial.print("\t| AcZ = "); Serial.print(myIMU.az);
 //  Serial.print("\t| Tmp = "); Serial.print(Tmp/340.00+36.53);  //equation for temperature in degrees C from datasheet
-//  Serial.print("\t| GyX = "); Serial.print(GyX);
-//  Serial.print("\t| GyY = "); Serial.print(GyY);
-//  Serial.print("\t| GyZ = "); Serial.print(GyZ);
+//  Serial.print("\t| GyX = "); Serial.print(myIMU.gx);
+//  Serial.print("\t| GyY = "); Serial.print(myIMU.gy);
+//  Serial.print("\t| GyZ = "); Serial.println(myIMU.gz);
 //  Serial.print("\t| mx = "); Serial.print(myIMU.mx);
 //  Serial.print("\t| my = "); Serial.print(myIMU.my);
 //  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
 //  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
 
   //Final Send
+  Serial.print(myIMU.mx); Serial.print(","); Serial.print(myIMU.my); Serial.print(","); Serial.print(myIMU.mz); Serial.print("\n");
+  delay(333);
+
+
+  //Prototype Send
 //  char msg[50] = "";
-//  Serial.print(myIMU.mx); Serial.print(","); Serial.print(myIMU.my); Serial.print(","); Serial.print(myIMU.mz); Serial.print("\n");
-//  delay(333);
-
-
-  //Prototype Send  
 //  sprintf(msg,"%d,%d,%d,%d\n",myIMU.mx*100, myIMU.my*100, myIMU.mz*100, magnitude*100);
 //  Serial.print(msg);
 //  dtostrf(myIMU.mx,5,2,msg);
