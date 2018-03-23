@@ -20,6 +20,33 @@ void setup(){
   //Initialize Serial
   Serial.begin(9600);
 
+  // Start by performing self test and reporting values
+  myIMU.MPU9250SelfTest(myIMU.SelfTest);
+  Serial.print("x-axis self test: acceleration trim within : ");
+  Serial.print(myIMU.SelfTest[0],1); Serial.println("% of factory value");
+  Serial.print("y-axis self test: acceleration trim within : ");
+  Serial.print(myIMU.SelfTest[1],1); Serial.println("% of factory value");
+  Serial.print("z-axis self test: acceleration trim within : ");
+  Serial.print(myIMU.SelfTest[2],1); Serial.println("% of factory value");
+  Serial.print("x-axis self test: gyration trim within : ");
+  Serial.print(myIMU.SelfTest[3],1); Serial.println("% of factory value");
+  Serial.print("y-axis self test: gyration trim within : ");
+  Serial.print(myIMU.SelfTest[4],1); Serial.println("% of factory value");
+  Serial.print("z-axis self test: gyration trim within : ");
+  Serial.print(myIMU.SelfTest[5],1); Serial.println("% of factory value");
+
+  myIMU.getAres();
+  myIMU.getGres();
+  
+
+  // Calibrate gyro and accelerometers, load biases in bias registers
+  myIMU.calibrateMPU9250(myIMU.gyroBias, myIMU.accelBias);
+  Serial.print("x-axis biases: "); Serial.print(myIMU.gyroBias[0]); Serial.print("d/s, "); Serial.print(myIMU.accelBias[0]); Serial.println("g");
+  Serial.print("y-axis biases: "); Serial.print(myIMU.gyroBias[1]); Serial.print("d/s, "); Serial.print(myIMU.accelBias[1]); Serial.println("g");
+  Serial.print("z-axis biases: "); Serial.print(myIMU.gyroBias[2]); Serial.print("d/s, "); Serial.print(myIMU.accelBias[2]); Serial.println("g");
+
+
+
   //Power on MPU
 //  Wire.beginTransmission(MPU_addr);
 //  Wire.write(0x6B);  // PWR_MGMT_1 register
@@ -57,7 +84,7 @@ void loop(){
   Wire.endTransmission(false);
   Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
 
-  //Receive Section
+  //Receive Accel and Gyro ADC values
   AcX=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)     
   AcY=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
   AcZ=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
@@ -65,6 +92,14 @@ void loop(){
   GyX=Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
   GyY=Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyZ=Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+
+  //Data translation into usable values
+//  AcX = AcX * myIMU.aRes - myIMU.accelBias[0];     //Ares and accelBias are floats, AcX is an int. May need to cast and use a different variable
+//  AcY = AcY * myIMU.aRes - myIMU.accelBias[1];
+//  AcZ = AcZ * myIMU.aRes - myIMU.accelBias[2];
+//  GyX = GyX * myIMU.gRes;
+//  GyY = GyY * myIMU.gRes;
+//  GyZ = GyZ * myIMU.gRes;
 
   //Mag Request
   Wire.beginTransmission(AK_addr);
@@ -97,8 +132,11 @@ void loop(){
   myIMU.mz *= myIMU.magScale[2];
 
 
+  //Data Processing
   //todo make sure this can actually hold the full calculation. Might be too small?
   magnitude = sqrt(myIMU.mx*myIMU.mx + myIMU.my*myIMU.my + myIMU.mz*myIMU.mz);  //Calculate the field magnitude with math.h
+  
+  
 
   //Output
 //  Serial.print("AcX = "); Serial.print(AcX);
@@ -112,9 +150,13 @@ void loop(){
 //  Serial.print("\t| my = "); Serial.print(myIMU.my);
 //  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
 //  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
-  char msg[50] = "";
-  Serial.print(myIMU.mx); Serial.print(","); Serial.print(myIMU.my); Serial.print(","); Serial.print(myIMU.mz); Serial.print("\n");
-  delay(333);
+
+  //Final Send
+//  char msg[50] = "";
+//  Serial.print(myIMU.mx); Serial.print(","); Serial.print(myIMU.my); Serial.print(","); Serial.print(myIMU.mz); Serial.print("\n");
+//  delay(333);
+
+
   //Prototype Send  
 //  sprintf(msg,"%d,%d,%d,%d\n",myIMU.mx*100, myIMU.my*100, myIMU.mz*100, magnitude*100);
 //  Serial.print(msg);
