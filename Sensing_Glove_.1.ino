@@ -137,15 +137,40 @@ void loop(){
 
 
   //Data Processing
+  unsigned long current_time;
+  float time_diff, accel_roll_angle, accel_pitch_angle, A = .01;
+  static float gyro_roll_angle=0, gyro_pitch_angle=0, gyro_yaw_angle=0;
+  static unsigned long prev_time = 0;
+  
+  
   //todo make sure this can actually hold the full calculation. Might be too small?
   magnitude = sqrt(myIMU.mx*myIMU.mx + myIMU.my*myIMU.my + myIMU.mz*myIMU.mz);  //Calculate the field magnitude with math.h
+
+
   //Rolling Sum of gyro orientation
-    //Going to use time for this. It's the only thing in the quad program that actually bothered
-    //millis() should return the number of microseconds since the program began running. If I keep a 1 reading history I can calculate the time since last read.
-  //Accelerometer Orientation Estimate
-    //atan2(double y, double x); This might return in rad/s
-  //Complementary Filter
-  
+    //Calculate Dt
+  current_time = millis();  //Returns milliseconds. Runs for 50 days before overflowing
+  time_diff = current_time - prev_time;
+  time_diff = time_diff/1000.0; //Convert to seconds. Seems to be about .02 usually.
+  prev_time = current_time;
+
+    //Calculate Rolling Sums
+  gyro_roll_angle = gyro_roll_angle + myIMU.gx*time_diff;
+  gyro_pitch_angle = gyro_pitch_angle + myIMU.gy*time_diff;
+  gyro_yaw_angle = gyro_yaw_angle + myIMU.gz*time_diff;
+    
+    
+    //Accelerometer Orientation Estimate
+    //atan2(double y, double x); This returns in rad/s, *180/3.1415
+  accel_roll_angle = atan2((double)myIMU.ay,(double)myIMU.az) * 180/3.1415;
+  accel_pitch_angle = atan2((double)myIMU.ax,(double)myIMU.az) * 180/3.1415;
+
+    
+    //Complementary Filter
+  myIMU.roll  = A*accel_roll_angle  + (1-A)*gyro_roll_angle;
+  myIMU.pitch = A*accel_pitch_angle + (1-A)*gyro_pitch_angle;
+  myIMU.yaw   = gyro_yaw_angle;
+    
   
 
   //Debug Output
@@ -160,13 +185,21 @@ void loop(){
 //  Serial.print("\t| my = "); Serial.print(myIMU.my);
 //  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
 //  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
+//  Serial.print(gyro_roll_angle); Serial.print(","); Serial.print(accel_roll_angle); Serial.print(","); Serial.println(myIMU.roll);
+//  Serial.print(gyro_pitch_angle); Serial.print(","); Serial.print(accel_pitch_angle); Serial.print(","); Serial.println(myIMU.pitch);
 
-  //Final Send
-  Serial.print(myIMU.mx); Serial.print(","); Serial.print(myIMU.my); Serial.print(","); Serial.print(myIMU.mz); Serial.print("\n");
+  //Final Output
+  Serial.print(myIMU.mx); Serial.print(",");
+  Serial.print(myIMU.my); Serial.print(",");
+  Serial.print(myIMU.mz); Serial.print(",");
+  Serial.print(magnitude); Serial.print(",");
+  Serial.print(myIMU.roll); Serial.print(",");
+  Serial.print(myIMU.pitch); Serial.print(",");
+  Serial.print(myIMU.yaw);  Serial.print("\n");
   delay(333);
 
 
-  //Prototype Send
+  //Prototype Output
 //  char msg[50] = "";
 //  sprintf(msg,"%d,%d,%d,%d\n",myIMU.mx*100, myIMU.my*100, myIMU.mz*100, magnitude*100);
 //  Serial.print(msg);
