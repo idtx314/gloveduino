@@ -105,7 +105,7 @@ void loop(){
   AcX=Wire.read()<<8|Wire.read();                                                           // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)     
   AcY=Wire.read()<<8|Wire.read();                                                           // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
   AcZ=Wire.read()<<8|Wire.read();                                                           // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  Tmp=Wire.read()<<8|Wire.read();                                                           // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+//  Tmp=Wire.read()<<8|Wire.read();                                                           // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
   GyX=Wire.read()<<8|Wire.read();                                                           // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
   GyY=Wire.read()<<8|Wire.read();                                                           // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyZ=Wire.read()<<8|Wire.read();                                                           // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
@@ -128,7 +128,7 @@ void loop(){
   myIMU.magCount[0]=Wire.read()|Wire.read()<<8;                                             // 0x03H (MAG_XOUT_L) & 0x04H (MAG_XOUT_H)     
   myIMU.magCount[1]=Wire.read()|Wire.read()<<8;                                             // 0x05H (MAG_YOUT_L) & 0x06H (MAG_YOUT_H)  
   myIMU.magCount[2]=Wire.read()|Wire.read()<<8;                                             // 0x07H (MAG_ZOUT_L) & 0x08H (MAG_ZOUT_H)  
-  c=Wire.read();                                                                            //Sensor overflow register, must be read to signal read end. Pg51.
+  c=Wire.read();                                                                            // Sensor overflow register, must be read to signal end of read. Pg51.
 
   // Calculate the magnetometer values in milliGauss
   // Include factory calibration per data sheet and user environmental
@@ -136,12 +136,12 @@ void loop(){
   // Get actual magnetometer value, this depends on scale being set
   // Reading* Resolution conversion factor * Calibration factor - bias determined by function
 
-  //Hard Iron Correction and Calibration to co-locate the centers of each reading plane.
+  //Apply Hard Iron Correction and Calibration
   myIMU.mx = (float)myIMU.magCount[0]*myIMU.mRes*myIMU.magCalibration[0] - myIMU.magbias[0];
   myIMU.my = (float)myIMU.magCount[1]*myIMU.mRes*myIMU.magCalibration[1] - myIMU.magbias[1];
   myIMU.mz = (float)myIMU.magCount[2]*myIMU.mRes*myIMU.magCalibration[2] - myIMU.magbias[2];
 
-  //Soft Iron Correction to normalize the sensor readings to an ellipsoid
+  //Apply Soft Iron Correction
   myIMU.mx *= myIMU.magScale[0];
   myIMU.my *= myIMU.magScale[1];
   myIMU.mz *= myIMU.magScale[2];
@@ -253,7 +253,7 @@ void magcalMPU9250(float * dest1, float * dest2) //hand in bias and Scale
 //    Serial.println("mag y min/max:"); Serial.println(mag_max[1]); Serial.println(mag_min[1]);
 //    Serial.println("mag z min/max:"); Serial.println(mag_max[2]); Serial.println(mag_min[2]);
 
-    // Get hard iron correction
+    // Get hard iron correction to co-locate the centers of each reading plane.
     mag_bias[0]  = (mag_max[0] + mag_min[0])/2;                                               // get average x mag bias in counts
     mag_bias[1]  = (mag_max[1] + mag_min[1])/2;                                               // get average y mag bias in counts
     mag_bias[2]  = (mag_max[2] + mag_min[2])/2;                                               // get average z mag bias in counts
@@ -262,7 +262,7 @@ void magcalMPU9250(float * dest1, float * dest2) //hand in bias and Scale
     dest1[1] = (float) mag_bias[1]*myIMU.mRes*myIMU.magCalibration[1];   
     dest1[2] = (float) mag_bias[2]*myIMU.mRes*myIMU.magCalibration[2];  
        
-    // Get soft iron correction estimate
+    // Get soft iron correction estimate to normalize the sensor readings to an ellipsoid reading surface
     mag_scale[0]  = (mag_max[0] - mag_min[0])/2;  // get average x axis max chord length in counts
     mag_scale[1]  = (mag_max[1] - mag_min[1])/2;  // get average y axis max chord length in counts
     mag_scale[2]  = (mag_max[2] - mag_min[2])/2;  // get average z axis max chord length in counts
