@@ -219,11 +219,12 @@ void loop(){
   
 
   //Motor Command Section
-  if(0)//(magnitude > 0) //todo re-enable
+  if(magnitude > 1100) //todo re-enable
   {
     HMD.Waveform(0, 13);                                                                      //loads wave into sequence register 0+seq
     HMD.go();                                                                                 //Plays the sequence registers.
     delay(600);                                                                               //Without a delay, the motor quickly stops vibrating. Possibly a safety check or race condition?
+                                                                                              //Of course, leaving this in means sending updates less frequently, so a solution will be needed. Set and check timer?
   }
 }
 
