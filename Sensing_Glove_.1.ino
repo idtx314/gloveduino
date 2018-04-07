@@ -219,7 +219,13 @@ void loop(){
   
 
   //Motor Command Section
-  if(magnitude > 1100) //todo re-enable
+  if(magnitude > 2200)
+  {
+    HMD.Waveform(0, 13);
+    HMD.go();
+    delay(300);
+  }
+  else if(magnitude > 1100)
   {
     HMD.Waveform(0, 13);                                                                      //loads wave into sequence register 0+seq
     HMD.go();                                                                                 //Plays the sequence registers.
