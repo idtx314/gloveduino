@@ -219,13 +219,13 @@ void loop(){
   
 
   //Motor Command Section
-  if(magnitude > 2200)
+  if(magnitude > 20000)
   {
     HMD.Waveform(0, 13);
     HMD.go();
     delay(300);
   }
-  else if(magnitude > 1100)
+  else if(magnitude > 30000)
   {
     HMD.Waveform(0, 13);                                                                      //loads wave into sequence register 0+seq
     HMD.go();                                                                                 //Plays the sequence registers.
