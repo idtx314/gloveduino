@@ -148,7 +148,7 @@ void loop(){
 
 
   //Data Processing
-  unsigned long current_time;
+  unsigned long current_time, vibe_timer=0;
   float time_diff, accel_roll_angle, accel_pitch_angle, A = .01;
   static float gyro_roll_angle=0, gyro_pitch_angle=0, gyro_yaw_angle=0;
   static unsigned long prev_time = 0;
@@ -207,7 +207,7 @@ void loop(){
   Serial.print(myIMU.roll); Serial.print(",");
   Serial.print(myIMU.pitch); Serial.print(",");
   Serial.print(myIMU.yaw);  Serial.print("\n");
-  delay(333);
+  delay(333);   //TODO this is probably not necessary. Evaluate.
 
 
   //Prototype Output
@@ -219,19 +219,38 @@ void loop(){
   
 
   //Motor Command Section
-  if(magnitude > 20000)
+  if(magnitude > 30000)
   {
     HMD.Waveform(0, 13);
     HMD.go();
     delay(300);
   }
-  else if(magnitude > 30000)
+  else if(magnitude > 20000)
   {
     HMD.Waveform(0, 13);                                                                      //loads wave into sequence register 0+seq
     HMD.go();                                                                                 //Plays the sequence registers.
     delay(600);                                                                               //Without a delay, the motor quickly stops vibrating. Possibly a safety check or race condition?
                                                                                               //Of course, leaving this in means sending updates less frequently, so a solution will be needed. Set and check timer?
   }
+
+//  if(magnitude > 30000)
+//  {
+//    if(millis() > vibe_timer + 300)
+//    {
+//      vibe_timer = millis();
+//      HMD.Waveform(0, 13);
+//      HMD.go();
+//    }
+//  }
+//  else if(magnitude > 20000)
+//  {
+//    if(millis() > vibe_timer + 600)
+//    {
+//      vibe_timer = millis();                                                                //loads wave into sequence register 0+seq
+//      HMD.Waveform(0, 13);                                                                  //Plays the sequence registers.
+//      HMD.go();                                                                             //Without a delay, the motor quickly stops vibrating. Possibly a safety check or race condition.
+//    }
+//  }
 }
 
 void magcalMPU9250(float * dest1, float * dest2) //hand in bias and Scale
