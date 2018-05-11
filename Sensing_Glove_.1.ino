@@ -207,17 +207,17 @@ void loop(){
   
 
   //Debug Output
-//  Serial.print("AcX = "); Serial.print(myIMU.ax);
-//  Serial.print("\t| AcY = "); Serial.print(myIMU.ay);
-//  Serial.print("\t| AcZ = "); Serial.print(myIMU.az);
+  Serial.print("AcX = "); Serial.print(myIMU.ax);
+  Serial.print("\t| AcY = "); Serial.print(myIMU.ay);
+  Serial.print("\t| AcZ = "); Serial.print(myIMU.az);
 //  Serial.print("\t| Tmp = "); Serial.print(Tmp/340.00+36.53);  //equation for temperature in degrees C from datasheet
 //  Serial.print("\t| GyX = "); Serial.print(myIMU.gx);
 //  Serial.print("\t| GyY = "); Serial.print(myIMU.gy);
 //  Serial.print("\t| GyZ = "); Serial.println(myIMU.gz);
-//  Serial.print("\t| mx = "); Serial.print(myIMU.mx);
-//  Serial.print("\t| my = "); Serial.print(myIMU.my);
-//  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
-//  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
+  Serial.print("\t| mx = "); Serial.print(myIMU.mx);
+  Serial.print("\t| my = "); Serial.print(myIMU.my);
+  Serial.print("\t| mz = "); Serial.print(myIMU.mz);
+  Serial.print("\t| Magnitude = "); Serial.println(magnitude);
 //  Serial.print(gyro_roll_angle); Serial.print(","); Serial.print(accel_roll_angle); Serial.print(","); Serial.println(myIMU.roll);
 //  Serial.print(gyro_pitch_angle); Serial.print(","); Serial.print(accel_pitch_angle); Serial.print(","); Serial.println(myIMU.pitch);
 
@@ -226,11 +226,11 @@ void loop(){
 //  Serial.print(myIMU.my); Serial.print(",");
 //  Serial.print(myIMU.mz); Serial.print(",");
 //  Serial.print(magnitude); Serial.print(",");
-  Serial.print(myIMU.roll); Serial.print("\t");
+//  Serial.print(myIMU.roll); Serial.print("\t");
 //  Serial.print(out_roll); Serial.print("\t");
-  Serial.print(myIMU.pitch); Serial.print("\t");
+//  Serial.print(myIMU.pitch); Serial.print("\t");
 //  Serial.print(out_pitch); Serial.print("\t");
-  Serial.print(myIMU.yaw);  Serial.print("\n");
+//  Serial.print(myIMU.yaw);  Serial.print("\n");
 //  Serial.print(out_yaw);  Serial.print("\n");
   delay(333);   //TODO this is probably not necessary. Evaluate.
 
