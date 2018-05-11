@@ -16,17 +16,23 @@
 #include <Sparkfun_DRV2605L.h>  //SparkFun Haptic Motor Driver Library 
 
 int debug = 0;
+int ledO = 0;
 const int MPU_addr=0x68;          // I2C address of the MPU-6050
 const int AK_addr=0x0C;           // I2C address of the AK8963 Magnetometer registers are denoted by an H at the end.
 uint8_t c;
 int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
 float magnitude;
+float prev_roll=0, out_roll=0;
+float prev_pitch=0, out_pitch=0;
+float prev_yaw=0, out_yaw=0;
 
 MPU9250 myIMU;                    //Initialize class
 SFE_HMD_DRV2605L HMD;             //Create haptic motor driver object 
 
 
 void setup(){
+
+//  pinMode(LED_BUILTIN, OUTPUT);   //TODO turn back on
   //Initialize I2C
   Wire.begin();
   //Initialize Serial
@@ -95,6 +101,14 @@ void setup(){
 }
 
 void loop(){
+//  //Heartbeat
+//  if(ledO == 0)
+//    ledO = 1;
+//  else
+//    ledO=0;
+//
+//  digitalWrite(LED_BUILTIN, ledO);    TODO turn heartbeat back on
+  
   //Request section
   Wire.beginTransmission(MPU_addr);
   Wire.write(0x3B);                                                                         // starting with register 0x3B (ACCEL_XOUT_H)
@@ -149,7 +163,7 @@ void loop(){
 
   //Data Processing
   unsigned long current_time, vibe_timer=0;
-  float time_diff, accel_roll_angle, accel_pitch_angle, A = .01;
+  float time_diff, accel_roll_angle, accel_pitch_angle, A = 1;
   static float gyro_roll_angle=0, gyro_pitch_angle=0, gyro_yaw_angle=0;
   static unsigned long prev_time = 0;
   
@@ -179,8 +193,16 @@ void loop(){
     
     //Complementary Filter in degrees
   myIMU.roll  = A*accel_roll_angle  + (1-A)*gyro_roll_angle;
+  out_roll = myIMU.roll - prev_roll;
+  prev_roll = myIMU.roll;
+  
   myIMU.pitch = A*accel_pitch_angle + (1-A)*gyro_pitch_angle;
+  out_pitch = myIMU.pitch - prev_pitch;
+  prev_pitch = myIMU.pitch;
+  
   myIMU.yaw   = gyro_yaw_angle;
+  out_yaw = myIMU.yaw - prev_yaw;
+  prev_yaw = myIMU.yaw;
     
   
 
@@ -200,13 +222,16 @@ void loop(){
 //  Serial.print(gyro_pitch_angle); Serial.print(","); Serial.print(accel_pitch_angle); Serial.print(","); Serial.println(myIMU.pitch);
 
   //Final Output
-  Serial.print(myIMU.mx); Serial.print(",");
-  Serial.print(myIMU.my); Serial.print(",");
-  Serial.print(myIMU.mz); Serial.print(",");
-  Serial.print(magnitude); Serial.print(",");
-  Serial.print(myIMU.roll); Serial.print(",");
-  Serial.print(myIMU.pitch); Serial.print(",");
+//  Serial.print(myIMU.mx); Serial.print(",");
+//  Serial.print(myIMU.my); Serial.print(",");
+//  Serial.print(myIMU.mz); Serial.print(",");
+//  Serial.print(magnitude); Serial.print(",");
+  Serial.print(myIMU.roll); Serial.print("\t");
+//  Serial.print(out_roll); Serial.print("\t");
+  Serial.print(myIMU.pitch); Serial.print("\t");
+//  Serial.print(out_pitch); Serial.print("\t");
   Serial.print(myIMU.yaw);  Serial.print("\n");
+//  Serial.print(out_yaw);  Serial.print("\n");
   delay(333);   //TODO this is probably not necessary. Evaluate.
 
 
