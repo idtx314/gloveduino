@@ -2,6 +2,8 @@
 
 #Program Spec: Initiate a node, subscribe to /glove data, whenever I receive a point from glove data, substitute it for the marker end point and publish the marker to /visualization_marker
 
+#I am playing with symbolic links
+
 import rospy
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
