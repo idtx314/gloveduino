@@ -15,7 +15,7 @@
 #include "MPU9250.h"            //SparkFun MPU-9250 Library
 #include <Sparkfun_DRV2605L.h>  //SparkFun Haptic Motor Driver Library 
 
-int debug = 1;
+int debug = 0;
 const int MPU_addr=0x68;          // I2C address of the MPU-6050
 const int AK_addr=0x0C;           // I2C address of the AK8963 Magnetometer registers are denoted by an H at the end.
 uint8_t c;
